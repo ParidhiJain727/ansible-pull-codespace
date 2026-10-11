@@ -1,0 +1,7 @@
+
+{
+  "name": "ansible-pull-lab",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "postCreateCommand": "bash setup.sh",
+  "postStartCommand": "sudo service cron start"
+}

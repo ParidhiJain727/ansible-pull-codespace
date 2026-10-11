@@ -1,0 +1,47 @@
+
+---
+- name: Configure Codespace using ansible-pull
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    repo_url: "https://github.com/ParidhiJain727/ansible-pull-codespace.git"
+
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        name:
+          - tree
+          - figlet
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Create devopsuser
+      ansible.builtin.user:
+        name: devopsuser
+        shell: /bin/bash
+        create_home: true
+        state: present
+
+    - name: Create lab directory
+      ansible.builtin.file:
+        path: /opt/devops-lab
+        state: directory
+        owner: devopsuser
+        mode: "0755"
+
+    - name: Deploy information file from template
+      ansible.builtin.template:
+        src: templates/info.txt.j2
+        dest: /opt/devops-lab/info.txt
+        owner: devopsuser
+        mode: "0644"
+
+    - name: Schedule ansible-pull every two minutes
+      ansible.builtin.cron:
+        name: ansible-pull
+        minute: "*/2"
+        user: root
+        job: "ansible-pull -U {{ repo_url }} -i localhost, local.yml >> /var/log/ansible-pull.log 2>&1"
